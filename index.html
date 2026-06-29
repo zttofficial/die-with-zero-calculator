@@ -370,12 +370,18 @@
 
   var last = null, chartInst = null;
 
-  /* ── Format ── */
+  /* ── Format — language-aware ── */
   function fmt(n){
     if(n===null||isNaN(n))return'—';
     var a=Math.abs(n),s=n<0?'-':'';
-    if(a>=1e8)return s+(a/1e8).toFixed(2)+'億';
-    if(a>=1e4)return s+(a/1e4).toFixed(1)+'萬';
+    if(LANG==='zh'){
+      if(a>=1e8)return s+(a/1e8).toFixed(2)+'億';
+      if(a>=1e4)return s+(a/1e4).toFixed(1)+'萬';
+    } else {
+      if(a>=1e9)return s+(a/1e9).toFixed(2)+'B';
+      if(a>=1e6)return s+(a/1e6).toFixed(2)+'M';
+      if(a>=1e3)return s+(a/1e3).toFixed(1)+'K';
+    }
     return s+Math.round(a).toLocaleString();
   }
 
@@ -590,22 +596,30 @@
     document.head.appendChild(s);
   }
 
-  /* ── Smart breakout: measure real column vs viewport, expand dynamically ── */
+  /* ── Smart breakout: unclip parent overflow, then expand into margins ── */
   function dwzBreakout(){
     var el=document.getElementById('dwz-app');
     if(!el) return;
+    /* Walk up and remove overflow:hidden that blocks negative-margin breakout */
+    var p=el.parentElement;
+    while(p && p!==document.body){
+      var cs=getComputedStyle(p);
+      if(cs.overflow==='hidden'||cs.overflowX==='hidden'){
+        p.style.overflowX='visible';
+        p.style.overflow='visible';
+      }
+      p=p.parentElement;
+    }
     var col=el.parentElement;
     var colW=col.getBoundingClientRect().width;
     var vw=document.documentElement.clientWidth;
-    // expand into up to 80% of the margin space on each side, cap at 200px/side
-    var extra=Math.min(Math.floor((vw-colW)/2*0.8), 200);
+    var extra=Math.min(Math.floor((vw-colW)/2*0.8), 240);
     if(extra>20){
       el.style.width=(colW+extra*2)+'px';
       el.style.marginLeft=-extra+'px';
       el.style.paddingLeft=(20+extra)+'px';
       el.style.paddingRight=(20+extra)+'px';
     } else {
-      // no sidebar / already full width — just reset to normal
       el.style.width='100%';
       el.style.marginLeft='';
       el.style.paddingLeft='20px';
