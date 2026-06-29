@@ -1,0 +1,624 @@
+<!-- Die with Zero vs FIRE Calculator — WordPress: paste into a Custom HTML block -->
+<div id="dwz-app">
+<style>
+#dwz-app{--bg:#f1f5f9;--card:#fff;--bd:#e2e8f0;--ring:#e0e7ff;--tx:#0f172a;--mu:#64748b;--fa:#94a3b8;--in:#6366f1;--ind:#4f46e5;--ro:#f43f5e;--gr:#10b981;--r:12px;--sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);}
+#dwz-app *,#dwz-app *::before,#dwz-app *::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── Base layout — breakout is handled by JS ── */
+#dwz-app{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto Sans TC',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  line-height:1.5;
+  width:100%;
+  padding:24px 20px;
+  transition:width .2s,margin-left .2s,padding .2s;
+}
+
+/* Header */
+.dh{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;}
+.dh-t h2{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px;}
+.dh-t p{font-size:.875rem;color:var(--mu);}
+/* Language toggle — bigger tap target */
+.dl{display:flex;background:#e2e8f0;border-radius:10px;padding:4px;flex-shrink:0;margin-top:2px;}
+.dl-b{min-height:36px;padding:6px 18px;border:none;background:none;border-radius:7px;font-size:.85rem;font-weight:700;cursor:pointer;color:var(--mu);transition:all .15s;line-height:1;}
+.dl-b.on{background:#fff;color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.14);}
+
+/* Cards */
+.dc{background:var(--card);border-radius:var(--r);padding:20px;margin-bottom:10px;box-shadow:var(--sh);border:1px solid var(--bd);}
+.dct{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--fa);margin-bottom:16px;}
+
+/* Grids — g3 is 3-col above 580px, else 1-col; g2 is 2-col above 440px */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:580px){.g3{grid-template-columns:1fr;}}
+@media(max-width:440px){.g2{grid-template-columns:1fr;}}
+
+/* Fields — labels bigger, inputs 44px tall */
+.df{display:flex;flex-direction:column;gap:5px;}
+.dl2{font-size:.82rem;font-weight:600;color:var(--mu);}
+.di{
+  min-height:44px;
+  padding:10px 14px;
+  border:1.5px solid var(--bd);
+  border-radius:8px;
+  font-size:.95rem;
+  color:var(--tx);
+  background:#fafafa;
+  outline:none;
+  width:100%;
+  transition:border-color .15s,box-shadow .15s;
+  /* hide number spinner arrows — cleaner look */
+  -moz-appearance:textfield;
+}
+.di::-webkit-inner-spin-button,.di::-webkit-outer-spin-button{-webkit-appearance:none;}
+.di:focus{border-color:var(--in);box-shadow:0 0 0 3px var(--ring);background:#fff;}
+.dhi{font-size:.72rem;color:var(--fa);}
+.dhi.note{color:#92400e;background:#fef3c7;border-radius:5px;padding:4px 8px;display:inline-block;margin-top:2px;font-size:.75rem;}
+
+/* Passive income sub-section */
+.dsub{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fa);margin:16px 0 10px;padding-top:14px;border-top:1px solid var(--bd);}
+
+/* Submit — full-width, taller */
+.dbr{padding:10px 0 22px;}
+.db{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:52px;
+  background:var(--in);
+  color:#fff;
+  border:none;
+  border-radius:var(--r);
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:.02em;
+  transition:background .15s,transform .12s,box-shadow .15s;
+  box-shadow:0 2px 14px rgba(99,102,241,.35);
+}
+.db:hover{background:var(--ind);transform:translateY(-1px);box-shadow:0 5px 20px rgba(99,102,241,.45);}
+.db:active{transform:none;}
+
+/* Results */
+@keyframes dIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+#dr{animation:dIn .3s ease;}
+
+/* Hero */
+.dhero{display:grid;grid-template-columns:1fr 44px 1fr;align-items:center;gap:10px;margin-bottom:10px;}
+.dhs{background:var(--card);border-radius:var(--r);padding:24px 16px;text-align:center;border:1.5px solid var(--bd);box-shadow:var(--sh);}
+.dhs.dwz{border-color:var(--in);background:linear-gradient(155deg,#fff 55%,#eef2ff);}
+.dhs.fire{border-color:#fca5a5;background:linear-gradient(155deg,#fff 55%,#fff1f2);}
+.dhtag{font-size:.65rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.dhs.dwz .dhtag{color:var(--in);}
+.dhs.fire .dhtag{color:var(--ro);}
+.dhnum{font-size:2.6rem;font-weight:900;letter-spacing:-.04em;line-height:1;}
+.dhs.dwz .dhnum{color:var(--in);}
+.dhs.fire .dhnum{color:var(--ro);}
+.dhsub{font-size:.78rem;color:var(--mu);margin-top:5px;}
+.dvs{text-align:center;font-size:.7rem;font-weight:800;color:var(--fa);letter-spacing:.06em;}
+
+/* Callout */
+.dcal{border-radius:var(--r);padding:14px 18px;margin-bottom:10px;font-size:.9rem;font-weight:600;text-align:center;border:1.5px solid;}
+.dcal.good{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+.dcal.warn{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}
+.dcal.info{background:#eef2ff;color:#4338ca;border-color:#c7d2fe;}
+.dcal.alert{background:#fff1f2;color:#be123c;border-color:#fecdd3;}
+
+/* Thresholds */
+.dths{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.dth{background:var(--card);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);border:1.5px solid var(--bd);}
+.dth.dwz{border-left:4px solid var(--in);}
+.dth.fire{border-left:4px solid var(--ro);}
+.dthl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fa);margin-bottom:6px;}
+.dth.dwz .dthl{color:var(--in);}
+.dth.fire .dthl{color:var(--ro);}
+.dthv{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;color:var(--tx);}
+.dths2{font-size:.72rem;color:var(--mu);margin-top:4px;}
+
+/* Chart */
+.dchw{position:relative;height:280px;margin-top:4px;}
+
+/* Insight */
+.dins{border-radius:var(--r);padding:18px 20px;font-size:.875rem;line-height:1.75;color:var(--tx);border:1.5px solid var(--bd);background:var(--card);box-shadow:var(--sh);}
+.dins-t{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;}
+.dins.info .dins-t{color:var(--in);}
+.dins.warn .dins-t{color:#c2410c;}
+.dins.info{border-color:#c7d2fe;}
+.dins.warn{border-color:#fed7aa;background:#fffbeb;}
+.dsr{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);font-size:.78rem;color:var(--mu);}
+.dsd{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dsd.pos{background:var(--gr);}
+.dsd.neg{background:var(--ro);}
+
+@media(max-width:580px){
+  .dths{grid-template-columns:1fr;}
+}
+@media(max-width:440px){
+  .dhero{grid-template-columns:1fr;gap:6px;}
+  .dvs{display:none;}
+  .dhnum{font-size:2rem;}
+  .dhs{padding:18px 14px;}
+  .dchw{height:220px;}
+  /* dwz-app width handled by dwzBreakout() JS */
+}
+</style>
+
+<!-- Header -->
+<div class="dh">
+  <div class="dh-t">
+    <h2 data-i18n="title">Die with Zero vs FIRE 計算器</h2>
+    <p data-i18n="subtitle">燒本金策略，讓你提早多少年財務自由？</p>
+  </div>
+  <div class="dl">
+    <button class="dl-b on" data-lang="zh" onclick="dwzLang('zh')">中文</button>
+    <button class="dl-b" data-lang="en" onclick="dwzLang('en')">EN</button>
+  </div>
+</div>
+
+<!-- Card 1: Personal -->
+<div class="dc">
+  <div class="dct" data-i18n="s_personal">個人資訊</div>
+  <div class="g3">
+    <div class="df">
+      <label class="dl2" data-i18n="l_age">目前年齡</label>
+      <input class="di" type="number" id="dwz-age" value="35" min="18" max="80">
+    </div>
+    <div class="df">
+      <label class="dl2" data-i18n="l_pension_age">退休 / 領退休金年齡</label>
+      <input class="di" type="number" id="dwz-pension-age" value="65" min="40" max="99">
+    </div>
+    <div class="df">
+      <label class="dl2" data-i18n="l_life">預期壽命</label>
+      <input class="di" type="number" id="dwz-life" value="85" min="50" max="120">
+    </div>
+  </div>
+</div>
+
+<!-- Card 2: Financials -->
+<div class="dc">
+  <div class="dct" data-i18n="s_finance">財務狀況（今日幣值，不需指定貨幣）</div>
+  <div class="g2">
+    <div class="df">
+      <label class="dl2" data-i18n="l_assets">現有淨資產</label>
+      <input class="di" type="number" id="dwz-assets" value="3000000" step="100000">
+      <span class="dhi" data-i18n="h_assets">存款 + 投資 − 負債</span>
+    </div>
+    <div class="df">
+      <label class="dl2" data-i18n="l_income">工作年收入（稅後）</label>
+      <input class="di" type="number" id="dwz-income" value="1200000" step="10000">
+      <span class="dhi note" data-i18n="h_income">💡 請含租金、股息等現有被動收入</span>
+    </div>
+    <div class="df">
+      <label class="dl2" data-i18n="l_wexp">目前年支出（工作期）</label>
+      <input class="di" type="number" id="dwz-wexp" value="800000" step="10000">
+      <span class="dhi" data-i18n="h_wexp">收入 − 支出 = 每年儲蓄</span>
+    </div>
+    <div class="df">
+      <label class="dl2" data-i18n="l_rexp">退休後目標年支出</label>
+      <input class="di" type="number" id="dwz-rexp" value="800000" step="10000">
+    </div>
+  </div>
+
+  <div class="dsub" data-i18n="s_passive">退休後收入來源</div>
+  <div class="g2">
+    <div class="df">
+      <label class="dl2" data-i18n="l_pension">退休金 / 年金</label>
+      <input class="di" type="number" id="dwz-pension" value="0" step="10000">
+      <span class="dhi" data-i18n="h_pension">達到退休年齡後才開始領</span>
+    </div>
+    <div class="df">
+      <label class="dl2" data-i18n="l_passive">長期被動收入（租金、股息）</label>
+      <input class="di" type="number" id="dwz-passive" value="0" step="10000">
+      <span class="dhi" data-i18n="h_passive">退休前後都有，已含在工作收入裡</span>
+    </div>
+  </div>
+</div>
+
+<!-- Card 3: Assumptions -->
+<div class="dc">
+  <div class="dct" data-i18n="s_assume">假設條件</div>
+  <div class="g2">
+    <div class="df">
+      <label class="dl2" data-i18n="l_ret">年化投資報酬率</label>
+      <input class="di" type="number" id="dwz-ret" value="7" step="0.5" min="0" max="30">
+      <span class="dhi" data-i18n="h_ret">% 全球股市長期約 7–10%（名目）</span>
+    </div>
+    <div class="df">
+      <label class="dl2" data-i18n="l_inf">通貨膨脹率</label>
+      <input class="di" type="number" id="dwz-inf" value="2.5" step="0.5" min="0" max="20">
+      <span class="dhi" data-i18n="h_inf">%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Button -->
+<div class="dbr">
+  <button class="db" onclick="dwzCalc()"><span data-i18n="btn">計算</span></button>
+</div>
+
+<!-- Results -->
+<div id="dr" style="display:none;">
+
+  <div class="dhero">
+    <div class="dhs dwz">
+      <div class="dhtag">Die with Zero</div>
+      <div class="dhnum" id="r-dwz-age">—</div>
+      <div class="dhsub" data-i18n="r_fi">歲財務自由</div>
+    </div>
+    <div class="dvs">VS</div>
+    <div class="dhs fire">
+      <div class="dhtag" data-i18n="fire_lbl">FIRE（4% 法則）</div>
+      <div class="dhnum" id="r-fire-age">—</div>
+      <div class="dhsub" data-i18n="r_fi2">歲財務自由</div>
+    </div>
+  </div>
+
+  <div class="dcal" id="r-cal"></div>
+
+  <div class="dths">
+    <div class="dth dwz">
+      <div class="dthl">Die with Zero</div>
+      <div class="dthv" id="r-dwz-need">—</div>
+      <div class="dths2" id="r-dwz-sub"></div>
+    </div>
+    <div class="dth fire">
+      <div class="dthl">FIRE</div>
+      <div class="dthv" id="r-fire-need">—</div>
+      <div class="dths2" id="r-fire-sub"></div>
+    </div>
+  </div>
+
+  <div class="dc">
+    <div class="dct" data-i18n="s_chart">資產軌跡（今日幣值）</div>
+    <div class="dchw"><canvas id="dwz-chart"></canvas></div>
+  </div>
+
+  <div class="dins" id="r-ins">
+    <div class="dins-t" id="r-ins-t"></div>
+    <div id="r-ins-b"></div>
+    <div class="dsr" id="r-sr"></div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  /* ── Translations ── */
+  var LANG = 'zh';
+  var T = {
+    zh: {
+      title:'Die with Zero vs FIRE 計算器', subtitle:'燒本金策略，讓你提早多少年財務自由？',
+      s_personal:'個人資訊', s_finance:'財務狀況（今日幣值，不需指定貨幣）',
+      s_assume:'假設條件', s_chart:'資產軌跡（今日幣值）', s_passive:'退休後收入來源',
+      l_age:'目前年齡', l_pension_age:'退休 / 領退休金年齡', l_life:'預期壽命',
+      l_assets:'現有淨資產', h_assets:'存款 + 投資 − 負債',
+      l_income:'工作年收入（稅後）', h_income:'💡 請含租金、股息等現有被動收入',
+      l_wexp:'目前年支出（工作期）', h_wexp:'收入 − 支出 = 每年儲蓄',
+      l_rexp:'退休後目標年支出',
+      l_pension:'退休金 / 年金', h_pension:'達到退休年齡後才開始領',
+      l_passive:'長期被動收入（租金、股息）', h_passive:'退休前後都有，已含在工作收入裡',
+      l_ret:'年化投資報酬率', h_ret:'% 全球股市長期約 7–10%（名目）',
+      l_inf:'通貨膨脹率', h_inf:'%',
+      btn:'計算', r_fi:'歲財務自由', r_fi2:'歲財務自由',
+      fire_lbl:'FIRE（4% 法則）', unavail:'達不到',
+      early: function(n){ return '燒本金策略讓你提早 '+n+' 年財務自由'; },
+      same: '兩種策略在同年達成財務自由',
+      no_fire: function(a){ return 'FIRE 在可見範圍內達不到；Die with Zero 讓你 '+a+' 歲退休'; },
+      cant: '⚠️ 以目前的儲蓄速度，即使燒本金也無法讓資產撐到壽命終止',
+      dwz_sub: function(y){ return '退休門檻（撐到 '+y+' 歲）'; },
+      fire_sub: '退休門檻（退休淨支出 × 25）',
+      chart_acc:'工作積累期', chart_draw:'Die with Zero 提領期', chart_fire:'FIRE 門檻（25×）',
+      chart_x:'年齡', chart_y:'資產（今日幣值）',
+      chart_ret: function(a){ return '退休 '+a+'歲'; },
+      tip_age: function(a){ return a+' 歲'; },
+      ins_ok:'兩種策略的本質差異', ins_warn:'財務缺口警告', ins_nofire:'Die with Zero 的優勢',
+      ins: function(d){
+        if(!d.dwzAge) return '目前每年淨儲蓄為 '+fmt(d.save)+'，以此速度即使燒本金也無法讓資產在 '+d.life+' 歲前撐住。建議提高儲蓄或降低退休支出目標。';
+        if(d.fireAge && d.fireAge > d.dwzAge){
+          return 'FIRE 的 4% 法則要求永不動本金：你需要存到 <strong>'+fmt(d.fireNum)+'</strong>（退休淨支出 × 25），才能靠報酬率永久 cover 支出。'+
+          '<br><br>Die with Zero 只需 <strong>'+fmt(d.dwzNeed)+'</strong>，少了 <strong>'+fmt(d.fireNum-d.dwzNeed)+'</strong>，因為你允許資產在 '+d.life+' 歲歸零——資產是用來花的，不是用來傳承的。'+
+          '<br><br>這讓你提早 <strong>'+(d.fireAge-d.dwzAge)+' 年</strong>脫離職場，在精力最旺盛的年紀把錢花在刀口上。';
+        }
+        if(!d.fireAge) return 'FIRE 需要 25 倍年支出的資產，以目前儲蓄速度短期內達不到。Die with Zero 讓你在 <strong>'+d.dwzAge+' 歲</strong>就可以退休，因為你願意在有生之年把本金花完。';
+        return '以你目前每年儲蓄 <strong>'+fmt(d.save)+'</strong> 的速度，兩種策略幾乎同步達成。若不打算留遺產，Die with Zero 讓你退休後花得更自在。';
+      },
+      sp: function(n){ return '目前每年儲蓄 '+fmt(n); },
+      sn: function(n){ return '⚠️ 目前每年消耗資產 '+fmt(Math.abs(n)); },
+    },
+    en: {
+      title:'Die with Zero vs FIRE Calculator', subtitle:'How many years earlier can you retire by spending down principal?',
+      s_personal:'Personal Info', s_finance:'Financials (enter values in your local currency)',
+      s_assume:'Assumptions', s_chart:"Asset Trajectory (today's dollars)", s_passive:'Post-Retirement Income',
+      l_age:'Current Age', l_pension_age:'Retirement / Pension Start Age', l_life:'Life Expectancy',
+      l_assets:'Current Net Assets', h_assets:'Savings + Investments − Debts',
+      l_income:'Annual Working Income (after tax)', h_income:'💡 Include current rental / dividend income here',
+      l_wexp:'Annual Expenses (working years)', h_wexp:'Income − Expenses = Annual Savings',
+      l_rexp:'Target Annual Retirement Spending',
+      l_pension:'Pension / Annuity', h_pension:'Starts at retirement age only',
+      l_passive:'Ongoing Passive Income (rent, dividends)', h_passive:'Available before & after retirement — already in working income above',
+      l_ret:'Annual Investment Return', h_ret:'% Global equities ≈ 7–10% long-term (nominal)',
+      l_inf:'Inflation Rate', h_inf:'%',
+      btn:'Calculate', r_fi:'Age of Financial Independence', r_fi2:'Age of Financial Independence',
+      fire_lbl:'FIRE (4% Rule)', unavail:'Not achievable',
+      early: function(n){ return 'Retire '+n+' years earlier with Die with Zero'; },
+      same: 'Both strategies achieve FI in the same year',
+      no_fire: function(a){ return 'FIRE not achievable in range; Die with Zero lets you retire at '+a; },
+      cant: '⚠️ Current savings rate is too low — even spending down principal won\'t last to life expectancy',
+      dwz_sub: function(y){ return 'Retirement threshold (lasts to age '+y+')'; },
+      fire_sub: 'Retirement threshold (net spending × 25)',
+      chart_acc:'Accumulation', chart_draw:'Die with Zero drawdown', chart_fire:'FIRE threshold (25×)',
+      chart_x:'Age', chart_y:"Assets (today's $)",
+      chart_ret: function(a){ return 'Retire @ '+a; },
+      tip_age: function(a){ return 'Age '+a; },
+      ins_ok:'The Core Difference', ins_warn:'Savings Gap Warning', ins_nofire:'The Die with Zero Advantage',
+      ins: function(d){
+        if(!d.dwzAge) return 'Current annual savings: '+fmt(d.save)+'. At this rate, even spending down principal won\'t sustain you to age '+d.life+'. Try saving more or reducing retirement spending.';
+        if(d.fireAge && d.fireAge > d.dwzAge){
+          return 'The FIRE 4% rule requires you to <em>never touch principal</em>: you need <strong>'+fmt(d.fireNum)+'</strong> (25× net retirement spending) so investment returns cover costs forever.'+
+          '<br><br>Die with Zero only requires <strong>'+fmt(d.dwzNeed)+'</strong> — <strong>'+fmt(d.fireNum-d.dwzNeed)+'</strong> less — because you\'re willing to reach zero by age '+d.life+'.'+
+          '<br><br>This gap lets you retire <strong>'+(d.fireAge-d.dwzAge)+' years earlier</strong>, spending when you\'re young enough to enjoy it.';
+        }
+        if(!d.fireAge) return 'FIRE requires 25× annual spending and isn\'t achievable at your savings rate. Die with Zero lets you retire at <strong>age '+d.dwzAge+'</strong> by spending down principal over your lifetime.';
+        return 'At your savings rate of <strong>'+fmt(d.save)+'/year</strong>, both strategies become available around the same time. If you don\'t plan to leave an inheritance, Die with Zero means spending more freely without anxiety.';
+      },
+      sp: function(n){ return 'Saving '+fmt(n)+' per year'; },
+      sn: function(n){ return '⚠️ Spending down assets by '+fmt(Math.abs(n))+' per year'; },
+    }
+  };
+
+  var last = null, chartInst = null;
+
+  /* ── Format ── */
+  function fmt(n){
+    if(n===null||isNaN(n))return'—';
+    var a=Math.abs(n),s=n<0?'-':'';
+    if(a>=1e8)return s+(a/1e8).toFixed(2)+'億';
+    if(a>=1e4)return s+(a/1e4).toFixed(1)+'萬';
+    return s+Math.round(a).toLocaleString();
+  }
+
+  /* ── Can retire at retAge with startAssets? (simulates year by year) ── */
+  function canRetire(retAge, startAssets, p){
+    var a = startAssets;
+    for(var yr=0; yr<=p.life-retAge; yr++){
+      var age = retAge + yr;
+      /* pension only starts at pensionAge */
+      var inc = (age >= p.pensionAge ? p.pension : 0) + p.passive;
+      var draw = p.rExp - inc;
+      a = a*(1+p.rR) - draw;
+      if(a < -1) return false;
+    }
+    return true;
+  }
+
+  /* ── Minimum assets needed to retire at retAge ── */
+  function minNeeded(retAge, p){
+    if(canRetire(retAge, 0, p)) return 0;
+    var lo=0, hi=p.assets*100+p.income*200;
+    for(var i=0;i<80;i++){
+      var mid=(lo+hi)/2;
+      if(canRetire(retAge,mid,p)) hi=mid; else lo=mid;
+    }
+    return (lo+hi)/2;
+  }
+
+  /* ── Lang switch ── */
+  window.dwzLang = function(l){
+    LANG = l;
+    document.querySelectorAll('#dwz-app .dl-b').forEach(function(b){ b.classList.toggle('on', b.dataset.lang===l); });
+    document.querySelectorAll('#dwz-app [data-i18n]').forEach(function(el){
+      var k=el.getAttribute('data-i18n');
+      if(T[l][k] && typeof T[l][k]==='string') el.textContent=T[l][k];
+    });
+    if(last) render(last);
+  };
+
+  /* ── Calculate ── */
+  window.dwzCalc = function(){
+    var age       = +document.getElementById('dwz-age').value;
+    var pensionAge= +document.getElementById('dwz-pension-age').value;
+    var life      = +document.getElementById('dwz-life').value;
+    var assets    = +document.getElementById('dwz-assets').value;
+    var income    = +document.getElementById('dwz-income').value;
+    var wExp      = +document.getElementById('dwz-wexp').value;
+    var rExp      = +document.getElementById('dwz-rexp').value;
+    var pension   = +document.getElementById('dwz-pension').value  || 0;
+    var passive   = +document.getElementById('dwz-passive').value  || 0;
+    var R         = +document.getElementById('dwz-ret').value / 100;
+    var F         = +document.getElementById('dwz-inf').value / 100;
+
+    if(life<=age)      { alert(LANG==='zh'?'預期壽命必須大於目前年齡':'Life expectancy must exceed current age'); return; }
+    if(pensionAge<age) { alert(LANG==='zh'?'退休年齡不能小於目前年齡':'Pension age cannot be less than current age'); return; }
+    if(rExp<=0)        { alert(LANG==='zh'?'退休後目標年支出不能為 0':'Target retirement spending must be > 0'); return; }
+
+    var rR   = (1+R)/(1+F)-1;
+    var save = income - wExp;
+
+    /* params bundle for canRetire */
+    var p = { life, pensionAge, pension, passive, rExp, rR, assets, income };
+
+    /* DwZ: find earliest retirement age */
+    var dwzAge=null, dwzNeed=null;
+    var a = assets;
+
+    for(var wa=age; wa<=life-1; wa++){
+      if(canRetire(wa, a, p)){
+        dwzAge = wa;
+        dwzNeed = minNeeded(wa, p);
+        break;
+      }
+      a = a*(1+rR) + save; /* accumulate one year */
+    }
+
+    /* FIRE: 25× of (rExp − passive) — pension excluded since FIRE targets early retirement */
+    var fireNetDraw = rExp - passive;
+    var fireNum = fireNetDraw > 0 ? fireNetDraw * 25 : 0;
+    var fireAge = null;
+    if(fireNetDraw <= 0 || assets >= fireNum){
+      fireAge = age;
+    } else {
+      var a2 = assets;
+      for(var wa2=age; wa2<90; wa2++){
+        a2 = a2*(1+rR) + save;
+        if(a2 >= fireNum){ fireAge = wa2+1; break; }
+      }
+    }
+
+    /* Build chart */
+    var labels=[], acc=[], draw=[], fire=[];
+    a = assets;
+    var retIdx = dwzAge!==null ? dwzAge-age : -1;
+
+    for(var yr=0; yr<=life-age; yr++){
+      var curAge = age+yr;
+      labels.push(curAge);
+      fire.push(fireNum);
+      var v = Math.max(a,0);
+
+      if(retIdx<0 || yr<retIdx){
+        acc.push(v); draw.push(null);
+        a = a*(1+rR)+save;
+      } else if(yr===retIdx){
+        acc.push(v); draw.push(v);
+        var inc0=(curAge>=pensionAge?pension:0)+passive;
+        a = a*(1+rR)-(rExp-inc0);
+      } else {
+        acc.push(null); draw.push(v);
+        var inc1=(curAge>=pensionAge?pension:0)+passive;
+        a = a*(1+rR)-(rExp-inc1);
+      }
+    }
+
+    last = { age, life, pensionAge, dwzAge, dwzNeed, fireAge, fireNum, save, rExp, passive, pension, rR, labels, acc, draw, fire, retIdx };
+    render(last);
+  };
+
+  /* ── Render ── */
+  function render(d){
+    var t = T[LANG];
+
+    document.getElementById('r-dwz-age').textContent  = d.dwzAge!==null  ? d.dwzAge  : t.unavail;
+    document.getElementById('r-fire-age').textContent = d.fireAge!==null ? d.fireAge : t.unavail;
+
+    /* Callout */
+    var cal = document.getElementById('r-cal');
+    var yrs = (d.dwzAge!==null && d.fireAge!==null) ? d.fireAge-d.dwzAge : null;
+    if(!d.dwzAge){       cal.className='dcal alert'; cal.textContent=t.cant; }
+    else if(yrs>0){      cal.className='dcal good';  cal.textContent=t.early(yrs); }
+    else if(yrs===0){    cal.className='dcal info';  cal.textContent=t.same; }
+    else if(!d.fireAge){ cal.className='dcal good';  cal.textContent=t.no_fire(d.dwzAge); }
+    else{                cal.className='dcal info';  cal.textContent=t.same; }
+
+    /* Thresholds */
+    document.getElementById('r-dwz-need').textContent = d.dwzNeed!==null ? fmt(d.dwzNeed) : '—';
+    document.getElementById('r-dwz-sub').textContent  = t.dwz_sub(d.life);
+    document.getElementById('r-fire-need').textContent= d.fireNum>0 ? fmt(d.fireNum) : '—';
+    document.getElementById('r-fire-sub').textContent = t.fire_sub;
+
+    /* Insight */
+    var ins=document.getElementById('r-ins'), it=document.getElementById('r-ins-t'), ib=document.getElementById('r-ins-b'), sr=document.getElementById('r-sr');
+    if(!d.dwzAge){ ins.className='dins warn'; it.textContent=t.ins_warn; }
+    else if(!d.fireAge){ ins.className='dins info'; it.textContent=t.ins_nofire; }
+    else{ ins.className='dins info'; it.textContent=t.ins_ok; }
+    ib.innerHTML = t.ins(d);
+    sr.innerHTML = '';
+    var dot=document.createElement('div'); dot.className='dsd '+(d.save>=0?'pos':'neg'); sr.appendChild(dot);
+    var sp=document.createElement('span'); sp.textContent=d.save>=0?t.sp(d.save):t.sn(d.save); sr.appendChild(sp);
+
+    /* Chart */
+    if(chartInst){ chartInst.destroy(); chartInst=null; }
+
+    var retMark = {
+      id:'retMark',
+      afterDraw: function(chart){
+        if(d.dwzAge===null) return;
+        var ctx=chart.ctx, x=chart.scales.x, y=chart.scales.y;
+        var px=x.getPixelForValue(d.retIdx);
+        ctx.save();
+        ctx.setLineDash([4,4]); ctx.strokeStyle='#6366f1'; ctx.lineWidth=1.5; ctx.globalAlpha=.65;
+        ctx.beginPath(); ctx.moveTo(px,y.top); ctx.lineTo(px,y.bottom); ctx.stroke();
+        ctx.globalAlpha=1; ctx.setLineDash([]);
+        ctx.fillStyle='#6366f1'; ctx.font='600 10px -apple-system,sans-serif'; ctx.textAlign='left';
+        ctx.fillText(t.chart_ret(d.dwzAge), px+4, y.top+14);
+        ctx.restore();
+      }
+    };
+
+    chartInst = new Chart(document.getElementById('dwz-chart').getContext('2d'),{
+      type:'line',
+      data:{
+        labels: d.labels,
+        datasets:[
+          { label:t.chart_acc,  data:d.acc,  borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,.08)', borderWidth:2.5, fill:true, tension:.3, pointRadius:0, pointHoverRadius:4, spanGaps:false },
+          { label:t.chart_draw, data:d.draw, borderColor:'#f43f5e', backgroundColor:'rgba(244,63,94,.08)',   borderWidth:2.5, fill:true, tension:.3, pointRadius:0, pointHoverRadius:4, spanGaps:false },
+          { label:t.chart_fire, data:d.fire, borderColor:'#f59e0b', borderWidth:1.5, borderDash:[5,4], fill:false, tension:0, pointRadius:0 }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{ mode:'index', intersect:false },
+        plugins:{
+          legend:{ position:'top', labels:{ font:{size:11}, padding:14, boxWidth:16, boxHeight:2 } },
+          tooltip:{
+            backgroundColor:'#0f172a', padding:10,
+            titleFont:{size:11,weight:'600'}, bodyFont:{size:11},
+            callbacks:{
+              title:function(i){ return t.tip_age(i[0].label); },
+              label:function(c){ if(c.parsed.y===null)return null; return ' '+c.dataset.label+': '+fmt(c.parsed.y); }
+            }
+          }
+        },
+        scales:{
+          x:{ title:{display:true,text:t.chart_x,color:'#94a3b8',font:{size:11}}, ticks:{maxTicksLimit:14,color:'#94a3b8',font:{size:10}}, grid:{color:'#f1f5f9'} },
+          y:{ title:{display:true,text:t.chart_y,color:'#94a3b8',font:{size:11}}, ticks:{color:'#94a3b8',font:{size:10},callback:function(v){return fmt(v);}}, grid:{color:'#f1f5f9'} }
+        }
+      },
+      plugins:[retMark]
+    });
+
+    var res=document.getElementById('dr');
+    res.style.display='block';
+    setTimeout(function(){ res.scrollIntoView({behavior:'smooth',block:'start'}); },100);
+  }
+
+  /* Load Chart.js */
+  if(typeof Chart==='undefined'){
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+    document.head.appendChild(s);
+  }
+
+  /* ── Smart breakout: measure real column vs viewport, expand dynamically ── */
+  function dwzBreakout(){
+    var el=document.getElementById('dwz-app');
+    if(!el) return;
+    var col=el.parentElement;
+    var colW=col.getBoundingClientRect().width;
+    var vw=document.documentElement.clientWidth;
+    // expand into up to 80% of the margin space on each side, cap at 200px/side
+    var extra=Math.min(Math.floor((vw-colW)/2*0.8), 200);
+    if(extra>20){
+      el.style.width=(colW+extra*2)+'px';
+      el.style.marginLeft=-extra+'px';
+      el.style.paddingLeft=(20+extra)+'px';
+      el.style.paddingRight=(20+extra)+'px';
+    } else {
+      // no sidebar / already full width — just reset to normal
+      el.style.width='100%';
+      el.style.marginLeft='';
+      el.style.paddingLeft='20px';
+      el.style.paddingRight='20px';
+    }
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',dwzBreakout);
+  } else {
+    dwzBreakout();
+  }
+  window.addEventListener('resize',dwzBreakout);
+})();
+</script>
+</div>
+<!-- End Die with Zero vs FIRE Calculator -->
