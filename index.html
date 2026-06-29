@@ -596,24 +596,26 @@
     document.head.appendChild(s);
   }
 
-  /* ── Smart breakout: unclip parent overflow, then expand into margins ── */
+  /* ── Smart breakout: unclip ALL ancestors (incl. <html>/<body>) then expand ── */
   function dwzBreakout(){
     var el=document.getElementById('dwz-app');
     if(!el) return;
-    /* Walk up and remove overflow:hidden that blocks negative-margin breakout */
-    var p=el.parentElement;
-    while(p && p!==document.body){
-      var cs=getComputedStyle(p);
-      if(cs.overflow==='hidden'||cs.overflowX==='hidden'){
-        p.style.overflowX='visible';
-        p.style.overflow='visible';
-      }
-      p=p.parentElement;
+    /* Twenty Twenty (and many themes) set overflow-x:hidden on <body> or <html>,
+       which clips negative-margin breakout. Walk all the way up to <html>. */
+    var node=el.parentElement;
+    while(node){
+      try{
+        var cs=getComputedStyle(node);
+        if(cs.overflowX==='hidden') node.style.overflowX='visible';
+        if(cs.overflow ==='hidden') node.style.overflow ='visible';
+      }catch(e){}
+      if(node===document.documentElement) break;
+      node=node.parentElement;
     }
     var col=el.parentElement;
     var colW=col.getBoundingClientRect().width;
     var vw=document.documentElement.clientWidth;
-    var extra=Math.min(Math.floor((vw-colW)/2*0.8), 240);
+    var extra=Math.min(Math.floor((vw-colW)/2*0.85), 260);
     if(extra>20){
       el.style.width=(colW+extra*2)+'px';
       el.style.marginLeft=-extra+'px';
